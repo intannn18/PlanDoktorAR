@@ -1,0 +1,1107 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#2ECC71">
+    <title>Plant Doctor AR - Dokter Tanaman Virtual</title>
+    
+    <!-- Bootstrap 5 -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <link rel="manifest" href="#" id="manifest-placeholder">
+    
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: #F5F5F5;
+            color: #2C3E50;
+            overflow-x: hidden;
+        }
+        
+        .app-container {
+            max-width: 100%;
+            min-height: 100vh;
+            padding-bottom: 80px;
+        }
+        
+        /* Header */
+        .app-header {
+            background: linear-gradient(135deg, #2ECC71 0%, #27AE60 100%);
+            color: white;
+            padding: 20px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+        
+        .app-header h1 {
+            font-size: 1.5rem;
+            font-weight: 600;
+            margin: 0;
+        }
+        
+        /* Home Screen */
+        .scan-button-container {
+            text-align: center;
+            padding: 40px 20px;
+        }
+        
+        .scan-button {
+            width: 200px;
+            height: 200px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #2ECC71 0%, #27AE60 100%);
+            border: none;
+            color: white;
+            font-size: 1.2rem;
+            font-weight: 600;
+            box-shadow: 0 8px 24px rgba(46, 204, 113, 0.4);
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+        
+        .scan-button:hover {
+            transform: scale(1.05);
+            box-shadow: 0 12px 32px rgba(46, 204, 113, 0.5);
+        }
+        
+        .scan-button i {
+            display: block;
+            font-size: 3rem;
+            margin-bottom: 10px;
+        }
+        
+        /* Plant Cards */
+        .plant-card {
+            background: white;
+            border-radius: 16px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+            transition: all 0.3s ease;
+        }
+        
+        .plant-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 8px 24px rgba(0,0,0,0.12);
+        }
+        
+        .plant-card-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+        
+        .plant-icon {
+            width: 60px;
+            height: 60px;
+            border-radius: 12px;
+            background: linear-gradient(135deg, #A3D9A5 0%, #6ABF69 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2rem;
+            margin-right: 15px;
+        }
+        
+        .plant-info h3 {
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin: 0;
+            color: #2C3E50;
+        }
+        
+        .plant-status {
+            font-size: 0.85rem;
+            color: #6ABF69;
+            margin: 5px 0 0 0;
+        }
+        
+        .plant-status.warning {
+            color: #F1C40F;
+        }
+        
+        .plant-status.danger {
+            color: #E74C3C;
+        }
+        
+        /* Camera View */
+        .camera-container {
+            position: relative;
+            width: 100%;
+            height: 60vh;
+            background: #000;
+            border-radius: 16px;
+            overflow: hidden;
+            margin: 20px 0;
+        }
+        
+        #camera-video {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        
+        .camera-overlay {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 80%;
+            height: 80%;
+            border: 3px dashed #2ECC71;
+            border-radius: 16px;
+            pointer-events: none;
+        }
+        
+        .capture-button {
+            position: absolute;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 70px;
+            height: 70px;
+            border-radius: 50%;
+            background: white;
+            border: 4px solid #2ECC71;
+            box-shadow: 0 4px 16px rgba(0,0,0,0.3);
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .capture-button:active {
+            transform: translateX(-50%) scale(0.9);
+        }
+        
+        /* Diagnosis Result */
+        .diagnosis-card {
+            background: white;
+            border-radius: 16px;
+            padding: 20px;
+            margin: 20px 0;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+        }
+        
+        .diagnosis-image {
+            width: 100%;
+            height: 250px;
+            object-fit: cover;
+            border-radius: 12px;
+            margin-bottom: 20px;
+        }
+        
+        .severity-badge {
+            display: inline-block;
+            padding: 6px 16px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            margin: 10px 0;
+        }
+        
+        .severity-low {
+            background: #A3D9A5;
+            color: #27AE60;
+        }
+        
+        .severity-medium {
+            background: #FFE4B5;
+            color: #F1C40F;
+        }
+        
+        .severity-high {
+            background: #FFD6D6;
+            color: #E74C3C;
+        }
+        
+        .solution-list {
+            list-style: none;
+            padding: 0;
+        }
+        
+        .solution-list li {
+            padding: 12px;
+            margin: 8px 0;
+            background: #F5F5F5;
+            border-radius: 8px;
+            border-left: 4px solid #2ECC71;
+        }
+        
+        /* Bottom Navigation */
+        .bottom-nav {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: white;
+            box-shadow: 0 -4px 12px rgba(0,0,0,0.1);
+            display: flex;
+            justify-content: space-around;
+            padding: 12px 0;
+            z-index: 1000;
+        }
+        
+        .nav-item {
+            flex: 1;
+            text-align: center;
+            padding: 8px;
+            color: #95A5A6;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: none;
+            background: none;
+        }
+        
+        .nav-item.active {
+            color: #2ECC71;
+        }
+        
+        .nav-item i {
+            display: block;
+            font-size: 1.5rem;
+            margin-bottom: 4px;
+        }
+        
+        .nav-item span {
+            font-size: 0.75rem;
+            display: block;
+        }
+        
+        /* Plant Library */
+        .library-item {
+            background: white;
+            border-radius: 12px;
+            padding: 16px;
+            margin: 12px 0;
+            display: flex;
+            align-items: center;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .library-item:hover {
+            box-shadow: 0 4px 16px rgba(0,0,0,0.1);
+        }
+        
+        .library-icon {
+            width: 50px;
+            height: 50px;
+            border-radius: 10px;
+            background: linear-gradient(135deg, #A3D9A5 0%, #6ABF69 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            margin-right: 15px;
+        }
+        
+        /* Reminder Card */
+        .reminder-card {
+            background: linear-gradient(135deg, #3498DB 0%, #2980B9 100%);
+            color: white;
+            border-radius: 12px;
+            padding: 16px;
+            margin: 12px 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .reminder-info h4 {
+            font-size: 1rem;
+            margin: 0 0 5px 0;
+        }
+        
+        .reminder-time {
+            font-size: 0.85rem;
+            opacity: 0.9;
+        }
+        
+        /* Search Bar */
+        .search-bar {
+            position: relative;
+            margin: 20px 0;
+        }
+        
+        .search-bar input {
+            width: 100%;
+            padding: 14px 50px 14px 20px;
+            border: none;
+            border-radius: 12px;
+            background: white;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+            font-size: 1rem;
+        }
+        
+        .search-bar i {
+            position: absolute;
+            right: 20px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #95A5A6;
+        }
+        
+        /* Hidden class */
+        .hidden {
+            display: none !important;
+        }
+        
+        /* Loading Animation */
+        .loading-spinner {
+            width: 50px;
+            height: 50px;
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #2ECC71;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 20px auto;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        /* Badges */
+        .badge-custom {
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 0.75rem;
+            font-weight: 500;
+        }
+        
+        .badge-light {
+            background: #FFE4B5;
+            color: #F1C40F;
+        }
+        
+        .badge-water {
+            background: #D6EAF8;
+            color: #3498DB;
+        }
+        
+        /* Grow Timeline */
+        .timeline-item {
+            position: relative;
+            padding-left: 40px;
+            margin: 20px 0;
+        }
+        
+        .timeline-item::before {
+            content: '';
+            position: absolute;
+            left: 15px;
+            top: 0;
+            bottom: -20px;
+            width: 2px;
+            background: #A3D9A5;
+        }
+        
+        .timeline-dot {
+            position: absolute;
+            left: 8px;
+            top: 5px;
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            background: #2ECC71;
+            border: 3px solid white;
+            box-shadow: 0 0 0 2px #2ECC71;
+        }
+        
+        .timeline-content {
+            background: white;
+            padding: 16px;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+        }
+        
+        /* Responsive */
+        @media (max-width: 576px) {
+            .scan-button {
+                width: 160px;
+                height: 160px;
+            }
+            
+            .scan-button i {
+                font-size: 2.5rem;
+            }
+            
+            .app-header h1 {
+                font-size: 1.2rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="app-container">
+        <!-- Home Screen -->
+        <div id="home-screen" class="screen">
+            <div class="app-header">
+                <h1><i class="fas fa-leaf"></i> Plant Doctor AR</h1>
+                <small>Dokter Tanaman Virtual Anda</small>
+            </div>
+            
+            <div class="scan-button-container">
+                <button class="scan-button" onclick="openCamera()">
+                    <i class="fas fa-camera"></i>
+                    <div>Scan Tanaman</div>
+                </button>
+            </div>
+            
+            <div class="container">
+                <h5 class="mb-3"><i class="fas fa-bell"></i> Pengingat Hari Ini</h5>
+                <div id="today-reminders"></div>
+                
+                <h5 class="mb-3 mt-4"><i class="fas fa-seedling"></i> Tanaman Favorit</h5>
+                <div id="favorite-plants"></div>
+            </div>
+        </div>
+        
+        <!-- Camera Screen -->
+        <div id="camera-screen" class="screen hidden">
+            <div class="app-header">
+                <button class="btn btn-link text-white" onclick="closeCamera()">
+                    <i class="fas fa-arrow-left"></i> Kembali
+                </button>
+            </div>
+            
+            <div class="container">
+                <div class="camera-container">
+                    <video id="camera-video" autoplay playsinline></video>
+                    <canvas id="camera-canvas" class="hidden"></canvas>
+                    <div class="camera-overlay"></div>
+                    <button class="capture-button" onclick="captureImage()"></button>
+                </div>
+                <p class="text-center text-muted mt-3">
+                    <i class="fas fa-info-circle"></i> Arahkan kamera ke tanaman Anda
+                </p>
+            </div>
+        </div>
+        
+        <!-- Diagnosis Screen -->
+        <div id="diagnosis-screen" class="screen hidden">
+            <div class="app-header">
+                <button class="btn btn-link text-white" onclick="showScreen('home-screen')">
+                    <i class="fas fa-arrow-left"></i> Kembali
+                </button>
+            </div>
+            
+            <div class="container">
+                <div class="diagnosis-card">
+                    <img id="diagnosis-image" class="diagnosis-image" src="" alt="Plant">
+                    <div id="diagnosis-loading" class="text-center">
+                        <div class="loading-spinner"></div>
+                        <p>Menganalisis tanaman Anda...</p>
+                    </div>
+                    <div id="diagnosis-result" class="hidden">
+                        <h4 id="disease-name">Nama Penyakit</h4>
+                        <span id="severity-badge" class="severity-badge"></span>
+                        <p class="mt-3" id="disease-description"></p>
+                        
+                        <h5 class="mt-4"><i class="fas fa-pills"></i> Solusi Perawatan</h5>
+                        <ul id="solution-list" class="solution-list"></ul>
+                        
+                        <div class="mt-4">
+                            <button class="btn btn-success w-100 mb-2" onclick="savePlant()">
+                                <i class="fas fa-save"></i> Simpan ke Tanaman Saya
+                            </button>
+                            <button class="btn btn-outline-primary w-100" onclick="setReminder()">
+                                <i class="fas fa-clock"></i> Atur Pengingat
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Library Screen -->
+        <div id="library-screen" class="screen hidden">
+            <div class="app-header">
+                <h1><i class="fas fa-book"></i> Perpustakaan Tanaman</h1>
+            </div>
+            
+            <div class="container">
+                <div class="search-bar">
+                    <input type="text" id="library-search" placeholder="Cari tanaman..." onkeyup="searchLibrary()">
+                    <i class="fas fa-search"></i>
+                </div>
+                
+                <div id="library-list"></div>
+            </div>
+        </div>
+        
+        <!-- My Plants Screen -->
+        <div id="myplants-screen" class="screen hidden">
+            <div class="app-header">
+                <h1><i class="fas fa-seedling"></i> Tanaman Saya</h1>
+            </div>
+            
+            <div class="container">
+                <div id="my-plants-list"></div>
+            </div>
+        </div>
+        
+        <!-- Timeline Screen -->
+        <div id="timeline-screen" class="screen hidden">
+            <div class="app-header">
+                <h1><i class="fas fa-chart-line"></i> Riwayat Pertumbuhan</h1>
+            </div>
+            
+            <div class="container">
+                <div id="timeline-list"></div>
+            </div>
+        </div>
+        
+        <!-- Bottom Navigation -->
+        <div class="bottom-nav">
+            <button class="nav-item active" onclick="showScreen('home-screen')">
+                <i class="fas fa-home"></i>
+                <span>Beranda</span>
+            </button>
+            <button class="nav-item" onclick="showScreen('library-screen')">
+                <i class="fas fa-book"></i>
+                <span>Library</span>
+            </button>
+            <button class="nav-item" onclick="openCamera()">
+                <i class="fas fa-camera"></i>
+                <span>Scan</span>
+            </button>
+            <button class="nav-item" onclick="showScreen('myplants-screen')">
+                <i class="fas fa-seedling"></i>
+                <span>Tanaman</span>
+            </button>
+            <button class="nav-item" onclick="showScreen('timeline-screen')">
+                <i class="fas fa-chart-line"></i>
+                <span>Timeline</span>
+            </button>
+        </div>
+    </div>
+    
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js"></script>
+    <script>
+        // Initialize App
+        let videoStream = null;
+        let currentDiagnosis = null;
+        
+        // Sample Data
+        const plantLibrary = [
+            {id: 1, name: 'Monstera Deliciosa', icon: '🌿', light: 'Sedang', water: '1x seminggu', difficulty: 'Mudah'},
+            {id: 2, name: 'Sansevieria', icon: '🌱', light: 'Rendah-Tinggi', water: '2 minggu sekali', difficulty: 'Sangat Mudah'},
+            {id: 3, name: 'Pothos', icon: '🍃', light: 'Sedang', water: '1x seminggu', difficulty: 'Mudah'},
+            {id: 4, name: 'Fiddle Leaf Fig', icon: '🌳', light: 'Tinggi', water: '1x seminggu', difficulty: 'Sedang'},
+            {id: 5, name: 'Peace Lily', icon: '🌺', light: 'Rendah-Sedang', water: '1x seminggu', difficulty: 'Mudah'},
+            {id: 6, name: 'Spider Plant', icon: '🕷️', light: 'Sedang', water: '2x seminggu', difficulty: 'Mudah'}
+        ];
+        
+        const diseaseDatabase = [
+            {
+                name: 'Busuk Daun',
+                severity: 'high',
+                description: 'Penyakit jamur yang menyebabkan daun membusuk dan berwarna coklat kehitaman.',
+                solutions: [
+                    'Buang semua daun yang terinfeksi',
+                    'Kurangi penyiraman, pastikan drainase baik',
+                    'Aplikasikan fungisida organik',
+                    'Pisahkan dari tanaman lain'
+                ]
+            },
+            {
+                name: 'Kekurangan Nitrogen',
+                severity: 'medium',
+                description: 'Daun menguning terutama pada bagian bawah, pertumbuhan terhambat.',
+                solutions: [
+                    'Berikan pupuk tinggi nitrogen (NPK 30-10-10)',
+                    'Tambahkan kompos organik',
+                    'Lakukan pemupukan rutin setiap 2 minggu',
+                    'Periksa pH tanah (ideal 6-7)'
+                ]
+            },
+            {
+                name: 'Serangan Kutu Daun',
+                severity: 'medium',
+                description: 'Hama kecil yang menempel di daun dan batang, menyedot nutrisi tanaman.',
+                solutions: [
+                    'Semprotkan air sabun lembut',
+                    'Gunakan insektisida organik (neem oil)',
+                    'Bersihkan manual dengan tisu basah',
+                    'Monitor rutin setiap hari'
+                ]
+            },
+            {
+                name: 'Tanaman Sehat',
+                severity: 'low',
+                description: 'Tanaman Anda dalam kondisi baik! Daun hijau segar dan tidak ada tanda penyakit.',
+                solutions: [
+                    'Lanjutkan perawatan rutin',
+                    'Pastikan mendapat cahaya cukup',
+                    'Siram sesuai kebutuhan',
+                    'Pupuk setiap 2-4 minggu'
+                ]
+            }
+        ];
+        
+        // Storage Functions
+        function getStoredData(key) {
+            const data = localStorage.getItem(key);
+            return data ? JSON.parse(data) : null;
+        }
+        
+        function setStoredData(key, value) {
+            localStorage.setItem(key, JSON.stringify(value));
+        }
+        
+        function initializeStorage() {
+            if (!getStoredData('myPlants')) {
+                setStoredData('myPlants', []);
+            }
+            if (!getStoredData('reminders')) {
+                setStoredData('reminders', [
+                    {id: 1, plant: 'Monstera', task: 'Penyiraman', time: 'Hari ini, 09:00'},
+                    {id: 2, plant: 'Sansevieria', task: 'Pemupukan', time: 'Besok, 10:00'}
+                ]);
+            }
+            if (!getStoredData('timeline')) {
+                setStoredData('timeline', []);
+            }
+        }
+        
+        // Screen Navigation
+        function showScreen(screenId) {
+            document.querySelectorAll('.screen').forEach(s => s.classList.add('hidden'));
+            document.getElementById(screenId).classList.remove('hidden');
+            
+            document.querySelectorAll('.nav-item').forEach(item => item.classList.remove('active'));
+            
+            if (screenId === 'home-screen') {
+                document.querySelectorAll('.nav-item')[0].classList.add('active');
+                loadHomeScreen();
+            } else if (screenId === 'library-screen') {
+                document.querySelectorAll('.nav-item')[1].classList.add('active');
+                loadLibrary();
+            } else if (screenId === 'myplants-screen') {
+                document.querySelectorAll('.nav-item')[3].classList.add('active');
+                loadMyPlants();
+            } else if (screenId === 'timeline-screen') {
+                document.querySelectorAll('.nav-item')[4].classList.add('active');
+                loadTimeline();
+            }
+            
+            animateScreen(screenId);
+        }
+        
+        function animateScreen(screenId) {
+            anime({
+                targets: `#${screenId}`,
+                opacity: [0, 1],
+                translateY: [20, 0],
+                duration: 500,
+                easing: 'easeOutQuad'
+            });
+        }
+        
+        // Home Screen
+        function loadHomeScreen() {
+            const reminders = getStoredData('reminders') || [];
+            const reminderHtml = reminders.slice(0, 3).map(r => `
+                <div class="reminder-card">
+                    <div class="reminder-info">
+                        <h4>${r.plant}</h4>
+                        <div class="reminder-time"><i class="fas fa-clock"></i> ${r.task} - ${r.time}</div>
+                    </div>
+                    <button class="btn btn-light btn-sm" onclick="completeReminder(${r.id})">
+                        <i class="fas fa-check"></i>
+                    </button>
+                </div>
+            `).join('');
+            document.getElementById('today-reminders').innerHTML = reminderHtml || '<p class="text-muted">Tidak ada pengingat hari ini</p>';
+            
+            const myPlants = getStoredData('myPlants') || [];
+            const plantsHtml = myPlants.slice(0, 3).map(p => `
+                <div class="plant-card">
+                    <div class="plant-card-header">
+                        <div class="plant-icon">${p.icon}</div>
+                        <div class="plant-info">
+                            <h3>${p.name}</h3>
+                            <p class="plant-status ${p.status === 'Sehat' ? '' : 'warning'}">
+                                <i class="fas fa-circle"></i> ${p.status}
+                            </p>
+                        </div>
+                    </div>
+                    <div class="d-flex gap-2">
+                        <span class="badge-custom badge-light"><i class="fas fa-sun"></i> ${p.light}</span>
+                        <span class="badge-custom badge-water"><i class="fas fa-tint"></i> ${p.water}</span>
+                    </div>
+                </div>
+            `).join('');
+            document.getElementById('favorite-plants').innerHTML = plantsHtml || '<p class="text-muted">Belum ada tanaman disimpan</p>';
+        }
+        
+        // Camera Functions
+        async function openCamera() {
+            showScreen('camera-screen');
+            try {
+                videoStream = await navigator.mediaDevices.getUserMedia({ 
+                    video: { facingMode: 'environment' } 
+                });
+                document.getElementById('camera-video').srcObject = videoStream;
+            } catch (error) {
+                alert('Tidak dapat mengakses kamera. Pastikan izin kamera diberikan.');
+                showScreen('home-screen');
+            }
+        }
+        
+        function closeCamera() {
+            if (videoStream) {
+                videoStream.getTracks().forEach(track => track.stop());
+                videoStream = null;
+            }
+            showScreen('home-screen');
+        }
+        
+        function captureImage() {
+            const video = document.getElementById('camera-video');
+            const canvas = document.getElementById('camera-canvas');
+            const context = canvas.getContext('2d');
+            
+            canvas.width = video.videoWidth;
+            canvas.height = video.videoHeight;
+            context.drawImage(video, 0, 0);
+            
+            const imageData = canvas.toDataURL('image/jpeg');
+            
+            closeCamera();
+            analyzePlant(imageData);
+        }
+        
+        // Diagnosis Functions
+        function analyzePlant(imageData) {
+            showScreen('diagnosis-screen');
+            document.getElementById('diagnosis-image').src = imageData;
+            document.getElementById('diagnosis-loading').classList.remove('hidden');
+            document.getElementById('diagnosis-result').classList.add('hidden');
+            
+            setTimeout(() => {
+                const randomDisease = diseaseDatabase[Math.floor(Math.random() * diseaseDatabase.length)];
+                currentDiagnosis = {
+                    image: imageData,
+                    disease: randomDisease,
+                    date: new Date().toISOString()
+                };
+                
+                displayDiagnosis(randomDisease);
+            }, 2000);
+        }
+        
+        function displayDiagnosis(disease) {
+            document.getElementById('diagnosis-loading').classList.add('hidden');
+            document.getElementById('diagnosis-result').classList.remove('hidden');
+            
+            document.getElementById('disease-name').textContent = disease.name;
+            document.getElementById('disease-description').textContent = disease.description;
+            
+            const badge = document.getElementById('severity-badge');
+            badge.textContent = disease.severity === 'high' ? 'Parah' : disease.severity === 'medium' ? 'Sedang' : 'Ringan';
+            badge.className = `severity-badge severity-${disease.severity}`;
+            
+            const solutionHtml = disease.solutions.map(s => `<li><i class="fas fa-check-circle text-success"></i> ${s}</li>`).join('');
+            document.getElementById('solution-list').innerHTML = solutionHtml;
+            
+            anime({
+                targets: '#diagnosis-result',
+                opacity: [0, 1],
+                translateY: [30, 0],
+                duration: 800,
+                easing: 'easeOutQuad'
+            });
+        }
+        
+        function savePlant() {
+            if (!currentDiagnosis) return;
+            
+            const myPlants = getStoredData('myPlants') || [];
+            const plantName = prompt('Beri nama tanaman Anda:', 'Tanaman Baru');
+            
+            if (plantName) {
+                const newPlant = {
+                    id: Date.now(),
+                    name: plantName,
+                    icon: '🌿',
+                    status: currentDiagnosis.disease.severity === 'low' ? 'Sehat' : 'Perlu Perhatian',
+                    light: 'Sedang',
+                    water: '1x seminggu',
+                    lastDiagnosis: currentDiagnosis.disease.name,
+                    image: currentDiagnosis.image,
+                    addedDate: new Date().toISOString()
+                };
+                
+                myPlants.push(newPlant);
+                setStoredData('myPlants', myPlants);
+                
+                // Add to timeline
+                const timeline = getStoredData('timeline') || [];
+                timeline.unshift({
+                    id: Date.now(),
+                    plantName: plantName,
+                    event: 'Tanaman ditambahkan',
+                    diagnosis: currentDiagnosis.disease.name,
+                    date: new Date().toLocaleDateString('id-ID'),
+                    image: currentDiagnosis.image
+                });
+                setStoredData('timeline', timeline);
+                
+                alert('Tanaman berhasil disimpan!');
+                loadHomeScreen();
+            }
+        }
+        
+        function setReminder() {
+            const reminders = getStoredData('reminders') || [];
+            const plantName = prompt('Nama tanaman:', 'Tanaman Saya');
+            const task = prompt('Jenis perawatan (Penyiraman/Pemupukan/Lainnya):', 'Penyiraman');
+            
+            if (plantName && task) {
+                const newReminder = {
+                    id: Date.now(),
+                    plant: plantName,
+                    task: task,
+                    time: 'Besok, 09:00'
+                };
+                
+                reminders.push(newReminder);
+                setStoredData('reminders', reminders);
+                alert('Pengingat berhasil dibuat!');
+            }
+        }
+        
+        function completeReminder(id) {
+            const reminders = getStoredData('reminders') || [];
+            const filtered = reminders.filter(r => r.id !== id);
+            setStoredData('reminders', filtered);
+            loadHomeScreen();
+        }
+        
+        // Library Functions
+        function loadLibrary() {
+            const libraryHtml = plantLibrary.map(plant => `
+                <div class="library-item" onclick="showPlantDetail(${plant.id})">
+                    <div class="library-icon">${plant.icon}</div>
+                    <div class="flex-grow-1">
+                        <h5 class="mb-1">${plant.name}</h5>
+                        <small class="text-muted">
+                            <i class="fas fa-sun"></i> ${plant.light} | 
+                            <i class="fas fa-tint"></i> ${plant.water}
+                        </small>
+                    </div>
+                    <i class="fas fa-chevron-right text-muted"></i>
+                </div>
+            `).join('');
+            
+            document.getElementById('library-list').innerHTML = libraryHtml;
+        }
+        
+        function searchLibrary() {
+            const searchTerm = document.getElementById('library-search').value.toLowerCase();
+            const filtered = plantLibrary.filter(p => p.name.toLowerCase().includes(searchTerm));
+            
+            const libraryHtml = filtered.map(plant => `
+                <div class="library-item" onclick="showPlantDetail(${plant.id})">
+                    <div class="library-icon">${plant.icon}</div>
+                    <div class="flex-grow-1">
+                        <h5 class="mb-1">${plant.name}</h5>
+                        <small class="text-muted">
+                            <i class="fas fa-sun"></i> ${plant.light} | 
+                            <i class="fas fa-tint"></i> ${plant.water}
+                        </small>
+                    </div>
+                    <i class="fas fa-chevron-right text-muted"></i>
+                </div>
+            `).join('');
+            
+            document.getElementById('library-list').innerHTML = libraryHtml || '<p class="text-muted text-center">Tanaman tidak ditemukan</p>';
+        }
+        
+        function showPlantDetail(id) {
+            const plant = plantLibrary.find(p => p.id === id);
+            if (plant) {
+                alert(`${plant.name}\n\nCahaya: ${plant.light}\nPenyiraman: ${plant.water}\nKesulitan: ${plant.difficulty}\n\nDetail lengkap segera hadir!`);
+            }
+        }
+        
+        // My Plants Functions
+        function loadMyPlants() {
+            const myPlants = getStoredData('myPlants') || [];
+            
+            if (myPlants.length === 0) {
+                document.getElementById('my-plants-list').innerHTML = `
+                    <div class="text-center mt-5">
+                        <i class="fas fa-seedling" style="font-size: 4rem; color: #A3D9A5;"></i>
+                        <h5 class="mt-3">Belum Ada Tanaman</h5>
+                        <p class="text-muted">Mulai scan tanaman Anda untuk menambahkannya</p>
+                        <button class="btn btn-success mt-3" onclick="openCamera()">
+                            <i class="fas fa-camera"></i> Scan Sekarang
+                        </button>
+                    </div>
+                `;
+                return;
+            }
+            
+            const plantsHtml = myPlants.map(p => `
+                <div class="plant-card">
+                    <div class="plant-card-header">
+                        <div class="plant-icon">${p.icon}</div>
+                        <div class="plant-info">
+                            <h3>${p.name}</h3>
+                            <p class="plant-status ${p.status === 'Sehat' ? '' : 'warning'}">
+                                <i class="fas fa-circle"></i> ${p.status}
+                            </p>
+                        </div>
+                    </div>
+                    ${p.image ? `<img src="${p.image}" class="diagnosis-image mt-3" alt="${p.name}">` : ''}
+                    <div class="mt-3">
+                        <small class="text-muted">Diagnosis terakhir: ${p.lastDiagnosis}</small>
+                    </div>
+                    <div class="d-flex gap-2 mt-3">
+                        <button class="btn btn-outline-success btn-sm flex-grow-1" onclick="rescanPlant(${p.id})">
+                            <i class="fas fa-redo"></i> Scan Ulang
+                        </button>
+                        <button class="btn btn-outline-danger btn-sm" onclick="deletePlant(${p.id})">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </div>
+                </div>
+            `).join('');
+            
+            document.getElementById('my-plants-list').innerHTML = plantsHtml;
+        }
+        
+        function rescanPlant(id) {
+            openCamera();
+        }
+        
+        function deletePlant(id) {
+            if (confirm('Hapus tanaman ini?')) {
+                const myPlants = getStoredData('myPlants') || [];
+                const filtered = myPlants.filter(p => p.id !== id);
+                setStoredData('myPlants', filtered);
+                loadMyPlants();
+            }
+        }
+        
+        // Timeline Functions
+        function loadTimeline() {
+            const timeline = getStoredData('timeline') || [];
+            
+            if (timeline.length === 0) {
+                document.getElementById('timeline-list').innerHTML = `
+                    <div class="text-center mt-5">
+                        <i class="fas fa-chart-line" style="font-size: 4rem; color: #A3D9A5;"></i>
+                        <h5 class="mt-3">Belum Ada Riwayat</h5>
+                        <p class="text-muted">Riwayat pertumbuhan tanaman akan muncul di sini</p>
+                    </div>
+                `;
+                return;
+            }
+            
+            const timelineHtml = timeline.map((item, index) => `
+                <div class="timeline-item">
+                    <div class="timeline-dot"></div>
+                    <div class="timeline-content">
+                        <h6>${item.plantName}</h6>
+                        <p class="mb-2">${item.event}</p>
+                        ${item.diagnosis ? `<small class="text-muted">Diagnosis: ${item.diagnosis}</small><br>` : ''}
+                        <small class="text-muted"><i class="fas fa-calendar"></i> ${item.date}</small>
+                        ${item.image ? `<img src="${item.image}" class="diagnosis-image mt-2" alt="${item.plantName}">` : ''}
+                    </div>
+                </div>
+            `).join('');
+            
+            document.getElementById('timeline-list').innerHTML = timelineHtml;
+        }
+        
+        // Service Worker Registration
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('/sw.js').then(() => {
+                console.log('Service Worker Registered');
+            }).catch(err => {
+                console.log('Service Worker Registration Failed', err);
+            });
+        }
+        
+        // PWA Install Prompt
+        let deferredPrompt;
+        window.addEventListener('beforeinstallprompt', (e) => {
+            e.preventDefault();
+            deferredPrompt = e;
+            // Show install button if needed
+        });
+        
+        // Create Manifest Dynamically
+        const manifest = {
+            name: "Plant Doctor AR",
+            short_name: "Plant Doctor",
+            description: "Dokter Tanaman Virtual Berbasis AI & AR",
+            start_url: "/",
+            display: "standalone",
+            background_color: "#FFFFFF",
+            theme_color: "#2ECC71",
+            icons: [
+                {
+                    src: "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ccircle cx='50' cy='50' r='50' fill='%232ECC71'/%3E%3Ctext x='50' y='65' font-size='50' text-anchor='middle' fill='white'%3E🌿%3C/text%3E%3C/svg%3E",
+                    sizes: "192x192",
+                    type: "image/svg+xml"
+                }
+            ]
+        };
+        
+        const manifestBlob = new Blob([JSON.stringify(manifest)], {type: 'application/json'});
+        const manifestURL = URL.createObjectURL(manifestBlob);
+        document.getElementById('manifest-placeholder').setAttribute('href', manifestURL);
+        
+        // Service Worker Code (inline)
+        const swCode = `
+            const CACHE_NAME = 'plant-doctor-v1';
+            const urlsToCache = ['/'];
+            
+            self.addEventListener('install', event => {
+                event.waitUntil(
+                    caches.open(CACHE_NAME).then(cache => cache.addAll(urlsToCache))
+                );
+            });
+            
+            self.addEventListener('fetch', event => {
+                event.respondWith(
+                    caches.match(event.request).then(response => {
+                        return response || fetch(event.request);
+                    })
+                );
+            });
+        `;
+        
+        // Initialize App
+        document.addEventListener('DOMContentLoaded', () => {
+            initializeStorage();
+            loadHomeScreen();
+            
+            // Animate on load
+            anime({
+                targets: '.scan-button',
+                scale: [0, 1],
+                duration: 800,
+                easing: 'easeOutElastic(1, .8)'
+            });
+        });
+    </script>
+</body>
+</html>
